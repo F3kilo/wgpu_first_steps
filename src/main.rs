@@ -93,6 +93,7 @@ fn main() {
         width: window_size.width,                      // Ширина окна.
         height: window_size.height,                    // Высота окна.
         present_mode: wgpu::PresentMode::Mailbox,      // Алгоритм вывода кадров на экран.
+        alpha_mode: wgpu::CompositeAlphaMode::Auto     //
     };
     surface.configure(&device, &config);
 
@@ -122,14 +123,14 @@ fn main() {
                 {
                     let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: None, // Метку для отладки оставим не заданной.
-                        color_attachments: &[wgpu::RenderPassColorAttachment {
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                             view: &view, // Цель для отрисовки.
                             resolve_target: None, // Используется для мультисэмплинга.
                             ops: wgpu::Operations {
                                 load: wgpu::LoadOp::Clear(wgpu::Color::BLUE), // Очищаем кадр синим цветом.
                                 store: true, // Сохраняем содержимое после завершения данного RenderPass.
                             },
-                        }],
+                        })],
                         depth_stencil_attachment: None, // Буфер глубины не используем.
                     });
 
