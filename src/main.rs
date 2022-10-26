@@ -50,18 +50,22 @@ fn main() {
         label: None, // Метку для отладки оставим не заданной.
         source: wgpu::ShaderSource::Wgsl(shader_code.into()),
     };
-    let shader_module = device.create_shader_module(&descriptor);
+    let shader_module = device.create_shader_module(descriptor);
 
     // Определим, какой формат изображения лучше всего подходит для выбранного адаптера.
-    let surface_format = surface.get_preferred_format(&adapter).unwrap();
+    let surface_format = surface.get_supported_formats(&adapter)[0];
+
 
     // Зададим параметры целевого изображения. В нашем случае - поверхности в окне.
-    let color_targets = [wgpu::ColorTargetState {
+    let color_target = wgpu::ColorTargetState {
         // Параметры цели для отрисовки.
         format: surface_format,         // Формат целевого изображения.
         blend: None,                    // Смешение цветов не используем.
         write_mask: Default::default(), // Пишем во все каналы RGBA.
-    }];
+    };
+
+    // Поместим параметры целевого изображения в массив.
+    let color_targets = [Some(color_target)];
 
     // Параметры графического конвейера оставим, в основном, по умолчанию.
     let descriptor = wgpu::RenderPipelineDescriptor {
@@ -69,7 +73,7 @@ fn main() {
         primitive: Default::default(), // Создание фигур из вершин - по умолчанию.
         vertex: wgpu::VertexState {
             // Параметры вершинного шейдера.
-            buffers: &[],           // Буффер с данными о вершиназ не используется.
+            buffers: &[],           // Буффер с данными о вершинах не используется.
             module: &shader_module, // Идентификатор нашего шейдера.
             entry_point: "vs_main", // Имя функции, которая будет вызываться для вершин.
         },
@@ -93,7 +97,7 @@ fn main() {
         width: window_size.width,                      // Ширина окна.
         height: window_size.height,                    // Высота окна.
         present_mode: wgpu::PresentMode::Mailbox,      // Алгоритм вывода кадров на экран.
-        alpha_mode: wgpu::CompositeAlphaMode::Auto     //
+        alpha_mode: wgpu::CompositeAlphaMode::Auto,    // Использование альфа канала.
     };
     surface.configure(&device, &config);
 
@@ -124,7 +128,7 @@ fn main() {
                     let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: None, // Метку для отладки оставим не заданной.
                         color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                            view: &view, // Цель для отрисовки.
+                            view: &view,          // Цель для отрисовки.
                             resolve_target: None, // Используется для мультисэмплинга.
                             ops: wgpu::Operations {
                                 load: wgpu::LoadOp::Clear(wgpu::Color::BLUE), // Очищаем кадр синим цветом.
