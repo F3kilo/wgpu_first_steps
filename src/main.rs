@@ -19,6 +19,7 @@ fn main() {
 
     // Создание экземпляра графического API.
     let instance = wgpu::Instance::new(wgpu::Backends::all());
+    dbg!(instance.generate_report());
 
     // Создаём поверхность для отображения.
     let surface = unsafe { instance.create_surface(&window) };
@@ -96,7 +97,7 @@ fn main() {
         format: surface_format,                        // Формат, который мы выбрали ранее.
         width: window_size.width,                      // Ширина окна.
         height: window_size.height,                    // Высота окна.
-        present_mode: wgpu::PresentMode::Mailbox,      // Алгоритм вывода кадров на экран.
+        present_mode: wgpu::PresentMode::Fifo,         // Алгоритм вывода кадров на экран.
         alpha_mode: wgpu::CompositeAlphaMode::Auto,    // Использование альфа канала.
     };
     surface.configure(&device, &config);
